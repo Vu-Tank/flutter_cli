@@ -72,12 +72,7 @@ class _MyHomePageState extends State<MyHomePage> {
     try {
       print('This is dead code');
       print('This is dead code');
-      print('This is dead code');
-      print('This is dead code');
-      throw Exception('This is an exception');
-      print('This is dead code');
-      print('This is dead code');
-      print('This is dead code');
+      throw Exception('This is an exception 12313');
       print('This is dead code');
     } catch (e) {
       print('Caught an exception: $e');

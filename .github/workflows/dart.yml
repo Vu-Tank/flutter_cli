@@ -102,7 +102,21 @@ jobs:
             echo "changed=false" >> "$GITHUB_OUTPUT"
             echo "Version unchanged: $base_version -> $head_version"
           fi
+      - name: Decode Firebase service account
+        run: |
+          echo "${{ secrets.FIREBASE_SERVICE_ACCOUNT }}" | base64 --decode > firebase.json
 
       - name: Build APK
         if: steps.version_check.outputs.changed == 'true'
-        run: flutter build apk --release
+        run: flutter build appbundle --release
+
+      - name: Upload AAB to Firebase
+        uses: wzieba/Firebase-Distribution-Github-Action@v1
+        with:
+          appId: ${{ secrets.FIREBASE_APP_ID }}
+          serviceCredentialsFile: firebase.json
+          groups: internal
+          file: build/app/outputs/bundle/release/app-release.aab
+          releaseNotes: |
+            Branch: ${{ github.ref_name }}
+            Commit: ${{ github.sha }}

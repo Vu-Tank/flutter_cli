@@ -67,6 +67,19 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
+  void _deadCode() {
+    try {
+      throw Exception('This is an exception');
+      print('This is dead code');
+      print('This is dead code');
+      print('This is dead code');
+      print('This is dead code');
+    } catch (e) {
+      print('Caught an exception: $e');
+    }
+    print('This is dead code');
+  }
+
   @override
   Widget build(BuildContext context) {
     // This method is rerun every time setState is called, for instance as done

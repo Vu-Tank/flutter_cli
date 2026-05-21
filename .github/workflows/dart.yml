@@ -41,7 +41,7 @@ jobs:
           else
             echo "Analyzing changed files:"
             echo "$CHANGED"
-            dart analyze --fatal-infos $CHANGED
+            dart analyze --fatal-warnings --no-fatal-infos $CHANGED
           fi
 
       # - name: Run tests

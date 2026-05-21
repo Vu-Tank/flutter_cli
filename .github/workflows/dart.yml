@@ -114,7 +114,7 @@ jobs:
         if: steps.version_check.outputs.changed == 'true'
         uses: wzieba/Firebase-Distribution-Github-Action@v1
         with:
-          appId: ${{ secrets.FIREBASE_APP_ID }}
+          appId: ${{ secrets.FIREBASE_ANDROID_APP_ID }}
           serviceCredentialsFile: firebase.json
           groups: internal
           file: build/app/outputs/bundle/release/app-release.aab

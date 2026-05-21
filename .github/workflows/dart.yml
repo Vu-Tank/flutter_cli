@@ -111,6 +111,7 @@ jobs:
         run: flutter build appbundle --release
 
       - name: Upload AAB to Firebase
+        if: steps.version_check.outputs.changed == 'true'
         uses: wzieba/Firebase-Distribution-Github-Action@v1
         with:
           appId: ${{ secrets.FIREBASE_APP_ID }}

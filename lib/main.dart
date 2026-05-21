@@ -65,6 +65,24 @@ class _MyHomePageState extends State<MyHomePage> {
       // called again, and so nothing would appear to happen.
       _counter++;
     });
+    _deadCode();
+  }
+
+  void _deadCode() {
+    try {
+      print('This is dead code');
+      print('This is dead code');
+      print('This is dead code');
+      print('This is dead code');
+      throw Exception('This is an exception');
+      print('This is dead code');
+      print('This is dead code');
+      print('This is dead code');
+      print('This is dead code');
+    } catch (e) {
+      print('Caught an exception: $e');
+    }
+    print('This is dead code');
   }
 
   @override

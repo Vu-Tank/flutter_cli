@@ -70,6 +70,10 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void _deadCode() {
     try {
+            print('This is dead code');
+      print('This is dead code');
+      print('This is dead code');
+      print('This is dead code');
       throw Exception('This is an exception');
       print('This is dead code');
       print('This is dead code');

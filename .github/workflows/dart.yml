@@ -117,7 +117,7 @@ jobs:
           appId: ${{ secrets.FIREBASE_ANDROID_APP_ID }}
           serviceCredentialsFile: firebase.json
           groups: internal
-          file: build/app/outputs/flutter-apk/release/app-release.apk
+          file: build/app/outputs/flutter-apk/app-release.apk
           releaseNotes: |
             Branch: ${{ github.ref_name }}
             Commit: ${{ github.sha }}

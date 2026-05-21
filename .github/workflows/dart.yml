@@ -14,6 +14,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - uses: subosito/flutter-action@v2
         with:
@@ -31,7 +33,13 @@ jobs:
       - name: Analyze changed files & check dead code
         shell: bash
         run: |
-          CHANGED_FILES=$(git diff --name-only --diff-filter=ACMR origin/${{ github.base_ref }}...HEAD | grep '.dart$' | grep -v '.g.dart$' || true)
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            BASE_REF="origin/${{ github.base_ref }}"
+          else
+            BASE_REF="${{ github.event.before }}"
+          fi
+
+          CHANGED_FILES=$(git diff --name-only --diff-filter=ACMR "$BASE_REF"...HEAD | grep '.dart$' | grep -v '.g.dart$' || true)
 
           if [ -z "$CHANGED_FILES" ]; then
             echo "No changed Dart files to analyze."

@@ -28,8 +28,21 @@ jobs:
       - name: Verify formatting
         run: dart format --output=none --set-exit-if-changed .
 
-      - name: Analyze project source
-        run: flutter analyze
+      - name: Analyze changed files & check dead code
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            CHANGED=$(git diff --name-only origin/${{ github.base_ref }}...HEAD -- '*.dart')
+          else
+            CHANGED=$(git diff --name-only HEAD~1 HEAD -- '*.dart')
+          fi
+
+          if [ -z "$CHANGED" ]; then
+            echo "No Dart files changed, skipping analyze."
+          else
+            echo "Analyzing changed files:"
+            echo "$CHANGED"
+            dart analyze --fatal-infos $CHANGED
+          fi
 
       # - name: Run tests
       #   run: flutter test

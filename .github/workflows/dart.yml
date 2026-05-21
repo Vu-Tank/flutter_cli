@@ -57,7 +57,8 @@ jobs:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     steps:
       - uses: actions/checkout@v4
-
+        with:
+          fetch-depth: 0
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
@@ -70,21 +71,36 @@ jobs:
 
       - name: Check pubspec version changed
         id: version_check
+        shell: bash
         run: |
-          BASE_SHA="${{ github.event.pull_request.base.sha }}"
-          HEAD_SHA="${{ github.event.pull_request.head.sha }}"
+          set -euo pipefail
 
-          git fetch --no-tags origin "$BASE_SHA" "$HEAD_SHA"
+          BASE_SHA="${{ github.event.before }}"
+          HEAD_SHA="${{ github.sha }}"
+
+          echo "BASE_SHA=$BASE_SHA"
+          echo "HEAD_SHA=$HEAD_SHA"
+
+          if [[ -z "$BASE_SHA" || "$BASE_SHA" == "0000000000000000000000000000000000000000" ]]; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "Initial push or missing base commit, skip version comparison."
+            exit 0
+          fi
+
+          git fetch --no-tags origin "$BASE_SHA" "$HEAD_SHA" || true
 
           base_version=$(git show "$BASE_SHA:pubspec.yaml" | sed -n 's/^version:[[:space:]]*//p' | head -n 1)
           head_version=$(git show "$HEAD_SHA:pubspec.yaml" | sed -n 's/^version:[[:space:]]*//p' | head -n 1)
+
+          echo "base_version=$base_version"
+          echo "head_version=$head_version"
 
           if [[ -n "$base_version" && -n "$head_version" && "$base_version" != "$head_version" ]]; then
             echo "changed=true" >> "$GITHUB_OUTPUT"
             echo "Version changed: $base_version -> $head_version"
           else
             echo "changed=false" >> "$GITHUB_OUTPUT"
-            echo "Version unchanged: $base_version"
+            echo "Version unchanged: $base_version -> $head_version"
           fi
 
       - name: Build APK

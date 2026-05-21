@@ -108,7 +108,7 @@ jobs:
 
       - name: Build APK
         if: steps.version_check.outputs.changed == 'true'
-        run: flutter build appbundle --release
+        run: flutter build apk --release
 
       - name: Upload AAB to Firebase
         if: steps.version_check.outputs.changed == 'true'
@@ -117,7 +117,7 @@ jobs:
           appId: ${{ secrets.FIREBASE_ANDROID_APP_ID }}
           serviceCredentialsFile: firebase.json
           groups: internal
-          file: build/app/outputs/bundle/release/app-release.aab
+          file: build/app/outputs/bundle/release/app-release.apk
           releaseNotes: |
             Branch: ${{ github.ref_name }}
             Commit: ${{ github.sha }}

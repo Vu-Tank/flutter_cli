@@ -30,19 +30,15 @@ jobs:
 
       - name: Analyze changed files & check dead code
         run: |
-          if [ "${{ github.event_name }}" = "pull_request" ]; then
-            CHANGED=$(git diff --name-only origin/${{ github.base_ref }}...HEAD -- '*.dart')
-          else
-            CHANGED=$(git diff --name-only HEAD~1 HEAD -- '*.dart')
+          CHANGED_FILES=$(git diff --name-only --diff-filter=ACMR origin/${{ github.base_ref }}...HEAD | grep '.dart$' | grep -v '.g.dart$' || true)
+
+          if [ -z "$CHANGED_FILES" ]; then
+            echo "No changed Dart files to analyze."
+            exit 0
           fi
 
-          if [ -z "$CHANGED" ]; then
-            echo "No Dart files changed, skipping analyze."
-          else
-            echo "Analyzing changed files:"
-            echo "$CHANGED"
-            dart analyze --fatal-warnings --no-fatal-infos $CHANGED
-          fi
+          echo "$CHANGED_FILES"
+          flutter analyze --fatal-warnings --no-fatal-infos $CHANGED_FILES
 
       # - name: Run tests
       #   run: flutter test

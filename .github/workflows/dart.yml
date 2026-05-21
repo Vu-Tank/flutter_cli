@@ -5,10 +5,12 @@ on:
     branches: ["main"]
   pull_request:
     branches: ["main"]
+    types: [opened, synchronize, reopened, closed]
 
 jobs:
-  build:
+  quality:
     runs-on: ubuntu-latest
+    if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.action != 'closed')
 
     steps:
       - uses: actions/checkout@v4
@@ -16,6 +18,9 @@ jobs:
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
+          cache: true
+          cache-key: flutter-${{ runner.os }}-${{ hashFiles('**/pubspec.lock') }}
+          pub-cache-key: pub-${{ runner.os }}-${{ hashFiles('**/pubspec.lock') }}
 
       - name: Install dependencies
         run: flutter pub get
@@ -29,5 +34,42 @@ jobs:
       # - name: Run tests
       #   run: flutter test
 
+  build:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged == true
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+          cache-key: flutter-${{ runner.os }}-${{ hashFiles('**/pubspec.lock') }}
+          pub-cache-key: pub-${{ runner.os }}-${{ hashFiles('**/pubspec.lock') }}
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Check pubspec version changed
+        id: version_check
+        run: |
+          BASE_SHA="${{ github.event.pull_request.base.sha }}"
+          HEAD_SHA="${{ github.event.pull_request.head.sha }}"
+
+          git fetch --no-tags origin "$BASE_SHA" "$HEAD_SHA"
+
+          base_version=$(git show "$BASE_SHA:pubspec.yaml" | sed -n 's/^version:[[:space:]]*//p' | head -n 1)
+          head_version=$(git show "$HEAD_SHA:pubspec.yaml" | sed -n 's/^version:[[:space:]]*//p' | head -n 1)
+
+          if [[ -n "$base_version" && -n "$head_version" && "$base_version" != "$head_version" ]]; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+            echo "Version changed: $base_version -> $head_version"
+          else
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "Version unchanged: $base_version"
+          fi
+
       - name: Build APK
+        if: steps.version_check.outputs.changed == 'true'
         run: flutter build apk --release
